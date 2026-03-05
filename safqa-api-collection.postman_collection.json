@@ -1,0 +1,824 @@
+{
+  "info": {
+    "name": "Safqa API Collection",
+    "_postman_id": "safqa-api-v1",
+    "description": "Complete API collection for Safqa (صفقة) multi-vendor e-commerce platform.\n\nSetup:\n1. Set `base_url` variable to `http://127.0.0.1:8000/api`\n2. Login as Admin/Seller/Customer → copy token → set `admin_token`, `seller_token`, `customer_token`\n3. Set `Accept-Language: ar` or `en` in headers for language switching",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",       "value": "http://127.0.0.1:8000/api" },
+    { "key": "admin_token",    "value": "" },
+    { "key": "seller_token",   "value": "" },
+    { "key": "customer_token", "value": "" },
+    { "key": "lang",           "value": "en" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register — Customer",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/register",
+            "header": [{"key":"Accept-Language","value":"{{lang}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ahmed Customer\",\n  \"email\": \"customer@safqa.com\",\n  \"phone\": \"0512345678\",\n  \"password\": \"Password@123\",\n  \"password_confirmation\": \"Password@123\",\n  \"role\": \"customer\"\n}" }
+          }
+        },
+        {
+          "name": "Register — Seller",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/register",
+            "header": [{"key":"Accept-Language","value":"{{lang}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mohamed Seller\",\n  \"email\": \"seller@safqa.com\",\n  \"phone\": \"0598765432\",\n  \"password\": \"Password@123\",\n  \"password_confirmation\": \"Password@123\",\n  \"role\": \"seller\",\n  \"store_name\": \"Mohamed Store\"\n}" }
+          }
+        },
+        {
+          "name": "Login — Admin",
+          "event": [{"listen":"test","script":{"exec":["var json = pm.response.json();","if(json.data && json.data.token) pm.collectionVariables.set('admin_token', json.data.token);"]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@safqa.com\",\n  \"password\": \"Admin@12345\"\n}" }
+          }
+        },
+        {
+          "name": "Login — Seller",
+          "event": [{"listen":"test","script":{"exec":["var json = pm.response.json();","if(json.data && json.data.token) pm.collectionVariables.set('seller_token', json.data.token);"]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"seller@safqa.com\",\n  \"password\": \"Password@123\"\n}" }
+          }
+        },
+        {
+          "name": "Login — Customer",
+          "event": [{"listen":"test","script":{"exec":["var json = pm.response.json();","if(json.data && json.data.token) pm.collectionVariables.set('customer_token', json.data.token);"]}}],
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/login",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"customer@safqa.com\",\n  \"password\": \"Password@123\"\n}" }
+          }
+        },
+        {
+          "name": "Me (current user)",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/auth/me",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/refresh",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/auth/logout",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🌍 Public — Products & Categories",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?page=1&per_page=20&search=&category_id=&min_price=&max_price=&sort=newest&featured=",
+              "host": ["{{base_url}}"], "path": ["products"],
+              "query": [
+                {"key":"page","value":"1"},{"key":"per_page","value":"20"},
+                {"key":"search","value":""},{"key":"category_id","value":""},
+                {"key":"min_price","value":""},{"key":"max_price","value":""},
+                {"key":"sort","value":"newest"},{"key":"featured","value":""}
+              ]
+            },
+            "header": [{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Get Product by Slug",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/products/my-product-slug",
+            "header": [{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/categories",
+            "header": [{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Flash Deals",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/flash-deals",
+            "header": [{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Dashboard KPIs",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/dashboard",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Analytics (date range)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/analytics?from_date=2026-01-01&to_date=2026-03-31",
+              "host": ["{{base_url}}"], "path": ["admin","analytics"],
+              "query": [{"key":"from_date","value":"2026-01-01"},{"key":"to_date","value":"2026-03-31"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Monthly Report",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/reports?from_date=2026-03-01&to_date=2026-03-31",
+              "host": ["{{base_url}}"], "path": ["admin","reports"],
+              "query": [{"key":"from_date","value":"2026-03-01"},{"key":"to_date","value":"2026-03-31"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/users?role=customer&search=&is_active=1&per_page=20",
+              "host": ["{{base_url}}"], "path": ["admin","users"],
+              "query": [{"key":"role","value":"customer"},{"key":"search","value":""},{"key":"is_active","value":"1"},{"key":"per_page","value":"20"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Get User Detail",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/users/1",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Toggle User Active",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/users/2/toggle",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/admin/users/99",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Sellers",
+      "item": [
+        {
+          "name": "List Sellers",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/sellers?is_approved=0&per_page=20",
+              "host": ["{{base_url}}"], "path": ["admin","sellers"],
+              "query": [{"key":"is_approved","value":"0"},{"key":"per_page","value":"20"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Get Seller Detail",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/sellers/1",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Approve Seller",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/sellers/1/approve",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Reject Seller",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/sellers/1/reject",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Incomplete store information provided.\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Seller",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/admin/sellers/99",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Products",
+      "item": [
+        {
+          "name": "List Products (All)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/products?status=pending&per_page=20",
+              "host": ["{{base_url}}"], "path": ["admin","products"],
+              "query": [{"key":"status","value":"pending"},{"key":"per_page","value":"20"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Approve Product",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/products/1/approve",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Reject Product",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/products/1/reject",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Product images are low quality.\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/orders?status=pending&from_date=2026-01-01&to_date=2026-12-31",
+              "host": ["{{base_url}}"], "path": ["admin","orders"],
+              "query": [{"key":"status","value":"pending"},{"key":"from_date","value":"2026-01-01"},{"key":"to_date","value":"2026-12-31"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/orders/1/status",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"processing\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Admin — Subscription Plans",
+      "item": [
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/admin/plans",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Create Plan",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/admin/plans",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Starter\",\n  \"price\": 49.00,\n  \"billing_cycle\": \"monthly\",\n  \"max_products\": 10,\n  \"max_offers\": 2,\n  \"features\": [\"Up to 10 products\", \"Basic support\"],\n  \"sort_order\": 0\n}" }
+          }
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/admin/plans/1",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 89.00,\n  \"is_featured\": true\n}" }
+          }
+        },
+        {
+          "name": "Delete Plan",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/admin/plans/4",
+            "header": [{"key":"Authorization","value":"Bearer {{admin_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Profile & Password",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/profile",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/seller/profile",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mohamed Updated\",\n  \"store_name_en\": \"Mohamed Tech Store\",\n  \"store_name_ar\": \"متجر محمد للتقنية\",\n  \"store_description_en\": \"Best electronics in town\",\n  \"store_description_ar\": \"أفضل إلكترونيات في المدينة\",\n  \"lang\": \"ar\"\n}" }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/seller/profile/password",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"Password@123\",\n  \"password\": \"NewPassword@456\",\n  \"password_confirmation\": \"NewPassword@456\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Subscription",
+      "item": [
+        {
+          "name": "List Plans",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/subscription/plans",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Current Subscription",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/subscription/current",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Subscribe to Plan",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/subscription/subscribe",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"plan_id\": 2\n}" }
+          }
+        },
+        {
+          "name": "Subscription History",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/subscription/history",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Products",
+      "item": [
+        {
+          "name": "List My Products",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/seller/products?status=approved&per_page=15",
+              "host": ["{{base_url}}"], "path": ["seller","products"],
+              "query": [{"key":"status","value":"approved"},{"key":"per_page","value":"15"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/products",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name_en\": \"Samsung Galaxy S25 Ultra\",\n  \"name_ar\": \"سامسونج جالاكسي إس 25 الترا\",\n  \"category_id\": 1,\n  \"description_en\": \"The latest flagship from Samsung with AI features.\",\n  \"description_ar\": \"أحدث هاتف رائد من سامسونج مع ميزات الذكاء الاصطناعي.\",\n  \"short_description_en\": \"AI-powered flagship phone\",\n  \"short_description_ar\": \"هاتف رائد مدعوم بالذكاء الاصطناعي\",\n  \"price\": 4999.00,\n  \"compare_price\": 5499.00,\n  \"sku\": \"SGS25U-256\",\n  \"quantity\": 50,\n  \"is_featured\": false\n}" }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/seller/products/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 4799.00,\n  \"quantity\": 45\n}" }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/seller/products/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Upload Product Images",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/products/1/images",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}],
+            "body": { "mode": "formdata", "formdata": [
+              {"key":"images[]","type":"file","src":[]},
+              {"key":"primary_index","value":"0","type":"text"}
+            ]}
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Orders",
+      "item": [
+        {
+          "name": "List My Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/seller/orders?status=pending&per_page=15",
+              "host": ["{{base_url}}"], "path": ["seller","orders"],
+              "query": [{"key":"status","value":"pending"},{"key":"per_page","value":"15"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Get Order Detail",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/orders/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/seller/orders/1/status",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"shipped\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Offers",
+      "item": [
+        {
+          "name": "List Offers",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/offers",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Create Offer",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/offers",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"discount_type\": \"percent\",\n  \"discount_value\": 15,\n  \"starts_at\": \"2026-03-05 00:00:00\",\n  \"ends_at\": \"2026-03-10 23:59:59\",\n  \"is_flash_deal\": true\n}" }
+          }
+        },
+        {
+          "name": "Update Offer",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/seller/offers/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"discount_value\": 20,\n  \"is_active\": true\n}" }
+          }
+        },
+        {
+          "name": "Delete Offer",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/seller/offers/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Coupons",
+      "item": [
+        {
+          "name": "List Coupons",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/coupons",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Create Coupon",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/coupons",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"SAVE20\",\n  \"discount_type\": \"percent\",\n  \"discount_value\": 20,\n  \"min_order_amount\": 100,\n  \"max_discount\": 50,\n  \"usage_limit\": 100,\n  \"expires_at\": \"2026-12-31\"\n}" }
+          }
+        },
+        {
+          "name": "Create Coupon (auto-code)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/seller/coupons",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"discount_type\": \"fixed\",\n  \"discount_value\": 25,\n  \"expires_at\": \"2026-06-30\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Coupon",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/seller/coupons/1",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏪 Seller — Analytics",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/seller/analytics/dashboard",
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        },
+        {
+          "name": "Revenue (date range)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/seller/analytics/revenue?from_date=2026-01-01&to_date=2026-03-31",
+              "host": ["{{base_url}}"], "path": ["seller","analytics","revenue"],
+              "query": [{"key":"from_date","value":"2026-01-01"},{"key":"to_date","value":"2026-03-31"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{seller_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/profile",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/customer/profile",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ahmed Updated\",\n  \"lang\": \"ar\"\n}" }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/customer/profile/password",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"Password@123\",\n  \"password\": \"NewPass@789\",\n  \"password_confirmation\": \"NewPass@789\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/notifications",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/notifications/read-all",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        },
+        {
+          "name": "Mark One Read",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/notifications/1/read",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Cart",
+      "item": [
+        {
+          "name": "View Cart",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/cart",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/cart",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"variant_id\": null,\n  \"quantity\": 2\n}" }
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/customer/cart/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 3\n}" }
+          }
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/customer/cart/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/customer/cart",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Checkout",
+      "item": [
+        {
+          "name": "Validate Coupon",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/checkout/validate-coupon",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"code\": \"SAVE20\",\n  \"amount\": 500\n}" }
+          }
+        },
+        {
+          "name": "Place Order (Checkout)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/checkout",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"},{"key":"Accept-Language","value":"{{lang}}"}],
+            "body": { "mode": "raw", "raw": "{\n  \"address_id\": 1,\n  \"coupon_code\": \"SAVE20\",\n  \"notes\": \"Please deliver in the morning\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Orders",
+      "item": [
+        {
+          "name": "My Orders",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/customer/orders?status=&per_page=10",
+              "host": ["{{base_url}}"], "path": ["customer","orders"],
+              "query": [{"key":"status","value":""},{"key":"per_page","value":"10"}]
+            },
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Order Detail",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/orders/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/orders/1/cancel",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Reviews",
+      "item": [
+        {
+          "name": "Submit Review",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/reviews",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"order_id\": 1,\n  \"rating\": 5,\n  \"comment\": \"Excellent product! Highly recommended.\"\n}" }
+          }
+        },
+        {
+          "name": "My Reviews",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/reviews",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Wishlist",
+      "item": [
+        {
+          "name": "My Wishlist",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/wishlist",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Accept-Language","value":"{{lang}}"}]
+          }
+        },
+        {
+          "name": "Toggle Wishlist (Add/Remove)",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/wishlist",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1\n}" }
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/customer/wishlist/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛒 Customer — Addresses",
+      "item": [
+        {
+          "name": "My Addresses",
+          "request": {
+            "method": "GET", "url": "{{base_url}}/customer/addresses",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        },
+        {
+          "name": "Add Address",
+          "request": {
+            "method": "POST", "url": "{{base_url}}/customer/addresses",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Home\",\n  \"name\": \"Ahmed Ali\",\n  \"phone\": \"0512345678\",\n  \"country\": \"Saudi Arabia\",\n  \"city\": \"Riyadh\",\n  \"district\": \"Al Olaya\",\n  \"street\": \"King Fahd Road\",\n  \"building\": \"Tower 5, Apt 12\",\n  \"postal_code\": \"12211\",\n  \"notes\": \"Ring the bell twice\",\n  \"is_default\": true\n}" }
+          }
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT", "url": "{{base_url}}/customer/addresses/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"},{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Work\",\n  \"street\": \"Prince Mohammed Road\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE", "url": "{{base_url}}/customer/addresses/1",
+            "header": [{"key":"Authorization","value":"Bearer {{customer_token}}"}]
+          }
+        }
+      ]
+    }
+
+  ]
+}
