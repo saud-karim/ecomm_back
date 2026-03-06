@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Notifications\OrderStatusUpdatedNotification;
+use App\Notifications\OrderStatusChangedAdminNotification;
 
 class OrderController extends Controller
 {
@@ -49,7 +52,18 @@ class OrderController extends Controller
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled,refunded',
         ]);
 
+        $order->load('customer', 'seller.user');
         $order->update(['status' => $request->status]);
+
+        // Notify the customer
+        if ($order->customer) {
+            $order->customer->notify(new OrderStatusUpdatedNotification($order));
+        }
+
+        // Notify the seller
+        if ($order->seller?->user) {
+            $order->seller->user->notify(new OrderStatusChangedAdminNotification($order, 'admin'));
+        }
 
         return response()->json([
             'success' => true,

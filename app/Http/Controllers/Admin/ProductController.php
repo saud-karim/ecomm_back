@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Notifications\ProductApprovedNotification;
+use App\Notifications\ProductRejectedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -50,6 +52,10 @@ class ProductController extends Controller
             'rejection_reason' => null,
         ]);
 
+        if ($product->seller && $product->seller->user) {
+            $product->seller->user->notify(new ProductApprovedNotification($product));
+        }
+
         return response()->json([
             'success' => true,
             'message' => "Product '{$product->name}' approved and is now live.",
@@ -69,6 +75,10 @@ class ProductController extends Controller
             'is_active'        => false,
             'rejection_reason' => $request->reason,
         ]);
+
+        if ($product->seller && $product->seller->user) {
+            $product->seller->user->notify(new ProductRejectedNotification($product, $request->reason));
+        }
 
         return response()->json([
             'success' => true,

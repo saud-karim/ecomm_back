@@ -34,6 +34,9 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\AddressController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 
+// Notifications
+use App\Http\Controllers\NotificationController;
+
 /*
 |─────────────────────────────────────────────────────────────────────────────
 | Safqa API Routes  –  All prefixed with /api (via RouteServiceProvider)
@@ -71,6 +74,12 @@ Route::prefix('admin')
     Route::get('dashboard',  [AdminAnalyticsController::class, 'dashboard']);
     Route::get('analytics',  [AdminAnalyticsController::class, 'analytics']);
     Route::get('reports',    [AdminAnalyticsController::class, 'reports']);
+
+    // Notifications
+    Route::get('notifications',         [NotificationController::class, 'index']);
+    Route::post('notifications/read-all',[NotificationController::class, 'markAllAsRead']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
 
     // Users
     Route::get('users',               [AdminUserController::class, 'index']);
@@ -144,6 +153,12 @@ Route::prefix('seller')
     Route::get('analytics/dashboard', [SellerAnalyticsController::class, 'dashboard']);
     Route::get('analytics/revenue',   [SellerAnalyticsController::class, 'revenue']);
 
+    // Notifications
+    Route::get('notifications',         [NotificationController::class, 'index']);
+    Route::post('notifications/read-all',[NotificationController::class, 'markAllAsRead']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
+
     // Products
     Route::get('products',                            [SellerProductController::class, 'index']);
     Route::post('products',                           [SellerProductController::class, 'store']);
@@ -184,9 +199,10 @@ Route::prefix('customer')
     Route::put('profile/password',     [CustomerProfileController::class, 'changePassword']);
 
     // Notifications
-    Route::get('notifications',         [CustomerProfileController::class, 'notifications']);
-    Route::post('notifications/read-all',[CustomerProfileController::class, 'markAllRead']);
-    Route::post('notifications/{notification}/read', [CustomerProfileController::class, 'markRead']);
+    Route::get('notifications',         [NotificationController::class, 'index']);
+    Route::post('notifications/read-all',[NotificationController::class, 'markAllAsRead']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
 
     // Cart
     Route::get('cart',           [CartController::class, 'index']);

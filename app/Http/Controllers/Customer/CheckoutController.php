@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Coupon;
 use App\Models\Address;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -126,6 +127,12 @@ class CheckoutController extends Controller
             CartItem::where('user_id', $userId)->delete();
 
             DB::commit();
+
+            // Notify sellers
+            foreach ($orders as $o) {
+                // The seller belongs to a user, so we notify the User model attached to this seller
+                $o->seller->user->notify(new NewOrderNotification($o));
+            }
 
             // TODO: Integrate tap.company payment — return payment_url
             return response()->json([

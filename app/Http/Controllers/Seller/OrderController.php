@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Notifications\OrderStatusUpdatedNotification;
+use App\Notifications\OrderStatusChangedAdminNotification;
+use App\Models\User;
 
 class OrderController extends Controller
 {
@@ -20,6 +23,13 @@ class OrderController extends Controller
         $orders = $this->seller()->orders()
             ->with('customer:id,name,email,phone', 'items.product.primaryImage')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->search, function ($q) use ($request) {
+                $s = $request->search;
+                $q->where(function ($sub) use ($s) {
+                    $sub->where('id', 'like', "%$s%")
+                        ->orWhereHas('customer', fn($c) => $c->where('name', 'like', "%$s%")->orWhere('email', 'like', "%$s%"));
+                });
+            })
             ->when($request->from_date, fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->to_date, fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->latest()
@@ -62,6 +72,15 @@ class OrderController extends Controller
         }
 
         $order->update(['status' => $request->status]);
+
+        // Notify the customer
+        $order->customer->notify(new OrderStatusUpdatedNotification($order));
+
+        // Notify the super admin
+        $admin = User::where('role', 'super_admin')->first();
+        if ($admin) {
+            $admin->notify(new OrderStatusChangedAdminNotification($order, 'seller'));
+        }
 
         return response()->json([
             'success' => true,

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Category;
+use App\Models\User;
+use App\Notifications\NewProductSubmittedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -66,9 +68,15 @@ class ProductController extends Controller
             'status' => 'pending',
         ]);
 
+        // Notify all Super Admins
+        $admins = User::where('role', 'super_admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new NewProductSubmittedNotification($product));
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Product submitted for review.',
+            'message' => 'Product created successfully and is pending approval.',
             'data'    => $product,
         ], 201);
     }
@@ -98,6 +106,13 @@ class ProductController extends Controller
 
         $product->update($validated);
 
+        if (str_contains($product->status, 'pending') && isset($validated['status'])) {
+            $admins = User::where('role', 'super_admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new NewProductSubmittedNotification($product));
+            }
+        }
+
         return response()->json(['success' => true, 'message' => 'Product updated.', 'data' => $product]);
     }
 
@@ -124,8 +139,8 @@ class ProductController extends Controller
         foreach ($request->file('images') as $i => $file) {
             $path = $file->store('products', 'public');
             $image = $product->images()->create([
-                'image_url'  => $path,
-                'is_primary' => $i === ($request->input('primary_index', 0)),
+                'url'        => asset('storage/' . $path),
+                'is_primary' => $i === (int)$request->input('primary_index', 0),
                 'sort_order' => $product->images()->count() + $i,
             ]);
             $uploaded[] = $image;

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Translatable;
+use Illuminate\Notifications\Notifiable;
 
 class Seller extends Model
 {
-    use HasFactory, Translatable;
+    use HasFactory, Translatable, Notifiable;
 
     protected array $translatable = ['store_name', 'store_description'];
 
