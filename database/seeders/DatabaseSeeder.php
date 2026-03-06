@@ -39,9 +39,12 @@ class DatabaseSeeder extends Seeder
 
         // 3. Categories
         $catsParams = [
-            ['name_en' => 'Electronics', 'name_ar' => 'إلكترونيات', 'slug' => 'electronics', 'icon' => '📱'],
-            ['name_en' => 'Fashion', 'name_ar' => 'أزياء', 'slug' => 'fashion', 'icon' => '👗'],
-            ['name_en' => 'Home & Garden', 'name_ar' => 'المنزل والحديقة', 'slug' => 'home-garden', 'icon' => '🏠'],
+            ['name_en' => 'Others',         'name_ar' => 'أخرى',              'slug' => 'others',       'icon' => 'https://images.unsplash.com/photo-1549465220-1a8b9238964d?w=200&h=200&fit=crop', 'sort_order' => 999],
+            ['name_en' => 'Electronics',    'name_ar' => 'إلكترونيات',        'slug' => 'electronics',  'icon' => 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=200&h=200&fit=crop', 'sort_order' => 1],
+            ['name_en' => 'Fashion',        'name_ar' => 'أزياء',             'slug' => 'fashion',      'icon' => 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=200&h=200&fit=crop', 'sort_order' => 2],
+            ['name_en' => 'Home & Garden',  'name_ar' => 'المنزل والحديقة',   'slug' => 'home-garden',  'icon' => 'https://images.unsplash.com/photo-1618221195710-dd6b14582f3a?w=200&h=200&fit=crop', 'sort_order' => 3],
+            ['name_en' => 'Sports',         'name_ar' => 'رياضة',             'slug' => 'sports',       'icon' => 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=200&h=200&fit=crop', 'sort_order' => 4],
+            ['name_en' => 'Books',          'name_ar' => 'كتب',               'slug' => 'books',        'icon' => 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=200&h=200&fit=crop', 'sort_order' => 5],
         ];
         $catIds = [];
         foreach ($catsParams as $cat) {

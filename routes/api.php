@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PlanController as AdminPlanController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 
 // Seller
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -105,6 +106,12 @@ Route::prefix('admin')
     // Subscriptions
     Route::get('subscriptions',                [AdminSubscriptionController::class, 'index']);
     Route::get('subscriptions/{subscription}', [AdminSubscriptionController::class, 'show']);
+
+    // Categories
+    Route::get('categories',              [AdminCategoryController::class, 'index']);
+    Route::post('categories',             [AdminCategoryController::class, 'store']);
+    Route::put('categories/{category}',   [AdminCategoryController::class, 'update']);
+    Route::delete('categories/{category}',[AdminCategoryController::class, 'destroy']);
 });
 
 // ══════════════════════════════════════════════════════
