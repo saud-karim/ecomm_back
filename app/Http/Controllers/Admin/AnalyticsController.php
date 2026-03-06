@@ -47,13 +47,14 @@ class AnalyticsController extends Controller
         // Top selling sellers
         $topSellers = Seller::selectRaw('
                 sellers.id,
-                sellers.store_name_en as store_name,
+                sellers.store_name_en,
+                sellers.store_name_ar,
                 SUM(orders.total) as revenue,
                 COUNT(orders.id) as orders
             ')
             ->join('orders', 'sellers.id', '=', 'orders.seller_id')
             ->where('orders.payment_status', 'paid')
-            ->groupBy('sellers.id', 'sellers.store_name_en')
+            ->groupBy('sellers.id', 'sellers.store_name_en', 'sellers.store_name_ar')
             ->orderByDesc('revenue')
             ->limit(5)
             ->get();
@@ -62,6 +63,8 @@ class AnalyticsController extends Controller
         $newUsers = User::where('created_at', '>=', now()->subDays(7))->count();
         $newSubscriptions = Subscription::where('created_at', '>=', now()->subDays(7))
             ->where('status', 'active')->count();
+
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
 
         $revenueChart = $monthlyRevenue->map(function ($item) {
             return [
@@ -74,15 +77,16 @@ class AnalyticsController extends Controller
             'success' => true,
             'data'    => [
                 'kpis' => [
-                    'total_revenue'    => round($totalRevenue, 2),
-                    'total_orders'     => $totalOrders,
-                    'total_sellers'    => $totalSellers,
-                    'total_customers'  => $totalCustomers,
-                    'total_products'   => $totalProducts,
-                    'pending_products' => $pendingProducts,
-                    'pending_sellers'  => $pendingSellers,
-                    'new_users_7d'     => $newUsers,
-                    'new_subs_7d'      => $newSubscriptions,
+                    'total_revenue'         => round($totalRevenue, 2),
+                    'total_orders'          => $totalOrders,
+                    'total_sellers'         => $totalSellers,
+                    'total_users'           => $totalCustomers,
+                    'total_products'        => $totalProducts,
+                    'pending_products'      => $pendingProducts,
+                    'pending_sellers'       => $pendingSellers,
+                    'active_subscriptions'  => $activeSubscriptions,
+                    'new_users_7d'          => $newUsers,
+                    'new_subs_7d'           => $newSubscriptions,
                 ],
                 'revenue_chart'    => $revenueChart,
                 'orders_by_status' => $ordersByStatus,
@@ -111,19 +115,20 @@ class AnalyticsController extends Controller
         $topSellers = Seller::selectRaw('
                 sellers.id,
                 sellers.store_name_en,
+                sellers.store_name_ar,
                 SUM(orders.total) as orders_sum_total,
                 COUNT(orders.id) as orders_count
             ')
             ->join('orders', 'sellers.id', '=', 'orders.seller_id')
             ->where('orders.payment_status', 'paid')
-            ->groupBy('sellers.id', 'sellers.store_name_en')
+            ->groupBy('sellers.id', 'sellers.store_name_en', 'sellers.store_name_ar')
             ->orderByDesc('orders_sum_total')
             ->limit(10)
             ->get();
 
         $revenueByPlan = Subscription::select('plan_id')
             ->selectRaw('SUM(amount_paid) as total_revenue, COUNT(*) as count')
-            ->with('plan:id,name')
+            ->with('plan:id,name_en,name_ar,slug')
             ->where('status', 'active')
             ->groupBy('plan_id')
             ->get();

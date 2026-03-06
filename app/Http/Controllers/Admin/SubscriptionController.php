@@ -17,7 +17,8 @@ class SubscriptionController extends Controller
             ->when($request->plan_id, fn($q) => $q->where('plan_id', $request->plan_id))
             ->when($request->search, fn($q) =>
                 $q->whereHas('seller', fn($sq) =>
-                    $sq->where('store_name', 'like', "%{$request->search}%")
+                    $sq->where('store_name_en', 'like', "%{$request->search}%")
+                       ->orWhere('store_name_ar', 'like', "%{$request->search}%")
                 )
             )
             ->latest()

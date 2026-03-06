@@ -17,7 +17,8 @@ class ProductController extends Controller
             ->when($request->seller_id, fn($q) => $q->where('seller_id', $request->seller_id))
             ->when($request->category_id, fn($q) => $q->where('category_id', $request->category_id))
             ->when($request->search, fn($q) =>
-                $q->where('name', 'like', "%{$request->search}%")
+                $q->where('name_en', 'like', "%{$request->search}%")
+                  ->orWhere('name_ar', 'like', "%{$request->search}%")
                   ->orWhere('sku', 'like', "%{$request->search}%")
             )
             ->latest()

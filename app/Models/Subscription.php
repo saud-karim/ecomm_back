@@ -20,10 +20,17 @@ class Subscription extends Model
     ];
 
     protected $casts = [
-        'starts_at'  => 'datetime',
-        'expires_at' => 'datetime',
+        'starts_at'   => 'datetime',
+        'expires_at'  => 'datetime',
         'amount_paid' => 'decimal:2',
     ];
+
+    protected $appends = ['ends_at'];
+
+    public function getEndsAtAttribute(): ?string
+    {
+        return $this->expires_at?->toDateTimeString();
+    }
 
     public function seller()
     {

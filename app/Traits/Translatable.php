@@ -58,10 +58,8 @@ trait Translatable
             // Add the resolved value under the plain key
             $array[$field] = $this->getAttribute($field);
 
-            // Remove the raw locale-specific columns from output
-            foreach ($locales as $locale) {
-                unset($array["{$field}_{$locale}"]);
-            }
+            // We intentionally do NOT unset the raw locale-specific columns 
+            // because Admin panels need them for forms to edit translations!
         }
 
         return $array;

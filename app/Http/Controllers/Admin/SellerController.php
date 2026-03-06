@@ -13,11 +13,13 @@ class SellerController extends Controller
     public function index(Request $request): JsonResponse
     {
         $sellers = Seller::with('user', 'subscription.plan')
+            ->withCount('products')
             ->when($request->is_approved !== null, fn($q) =>
                 $q->where('is_approved', $request->boolean('is_approved'))
             )
             ->when($request->search, fn($q) =>
-                $q->where('store_name', 'like', "%{$request->search}%")
+                $q->where('store_name_en', 'like', "%{$request->search}%")
+                  ->orWhere('store_name_ar', 'like', "%{$request->search}%")
                   ->orWhereHas('user', fn($uq) =>
                     $uq->where('email', 'like', "%{$request->search}%")
                   )
