@@ -47,6 +47,8 @@ class OrderStatusChangedAdminNotification extends Notification
             'order_id'  => $orderId,
             'status'    => $this->order->status,
             'changed_by'=> $this->changedBy,
+            'store_name'=> $this->order->seller->store_name_en,
+            'store_name_ar'=> $this->order->seller->store_name_ar,
         ];
     }
 }

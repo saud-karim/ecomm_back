@@ -45,7 +45,9 @@ class NewProductSubmittedNotification extends Notification
             'message'     => "Seller '{$this->product->seller->store_name_en}' submitted a new product ('{$this->product->name_en}') for approval.",
             'product_id'  => $this->product->id,
             'product_name'=> $this->product->name_en,
+            'product_name_ar'=> $this->product->name_ar,
             'seller_name' => $this->product->seller->store_name_en,
+            'seller_name_ar'=> $this->product->seller->store_name_ar,
         ];
     }
 }

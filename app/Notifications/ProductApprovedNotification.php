@@ -45,6 +45,7 @@ class ProductApprovedNotification extends Notification
             'message'     => "Your product '{$this->product->name_en}' has been approved and is now live.",
             'product_id'  => $this->product->id,
             'product_name'=> $this->product->name_en,
+            'product_name_ar'=> $this->product->name_ar,
         ];
     }
 }

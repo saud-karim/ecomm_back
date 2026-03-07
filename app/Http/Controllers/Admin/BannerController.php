@@ -34,8 +34,10 @@ class BannerController extends Controller
     {
         $request->validate([
             'image'      => 'required|image|max:4096',
-            'title'      => 'nullable|string|max:200',
-            'subtitle'   => 'nullable|string|max:300',
+            'title_en'   => 'nullable|string|max:200',
+            'title_ar'   => 'nullable|string|max:200',
+            'subtitle_en'=> 'nullable|string|max:300',
+            'subtitle_ar'=> 'nullable|string|max:300',
             'link_url'   => 'nullable|url|max:500',
             'sort_order' => 'nullable|integer|min:0',
         ]);
@@ -44,8 +46,10 @@ class BannerController extends Controller
 
         $banner = Banner::create([
             'image_path' => $path,
-            'title'      => $request->title,
-            'subtitle'   => $request->subtitle,
+            'title_en'   => $request->title_en,
+            'title_ar'   => $request->title_ar,
+            'subtitle_en'=> $request->subtitle_en,
+            'subtitle_ar'=> $request->subtitle_ar,
             'link_url'   => $request->link_url,
             'sort_order' => $request->sort_order ?? 0,
             'is_active'  => true,
@@ -58,13 +62,15 @@ class BannerController extends Controller
     public function update(Request $request, Banner $banner): JsonResponse
     {
         $request->validate([
-            'title'      => 'nullable|string|max:200',
-            'subtitle'   => 'nullable|string|max:300',
+            'title_en'   => 'nullable|string|max:200',
+            'title_ar'   => 'nullable|string|max:200',
+            'subtitle_en'=> 'nullable|string|max:300',
+            'subtitle_ar'=> 'nullable|string|max:300',
             'link_url'   => 'nullable|url|max:500',
             'sort_order' => 'nullable|integer|min:0',
         ]);
 
-        $banner->update($request->only('title', 'subtitle', 'link_url', 'sort_order'));
+        $banner->update($request->only('title_en', 'title_ar', 'subtitle_en', 'subtitle_ar', 'link_url', 'sort_order'));
 
         // Allow image replacement
         if ($request->hasFile('image')) {
