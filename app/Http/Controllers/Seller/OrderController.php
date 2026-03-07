@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Notifications\OrderStatusUpdatedNotification;
 use App\Notifications\OrderStatusChangedAdminNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\User;
 
 class OrderController extends Controller
@@ -94,5 +95,30 @@ class OrderController extends Controller
         if ($order->seller_id !== $this->seller()->id) {
             abort(403, 'Access denied.');
         }
+    }
+
+    public function downloadInvoice(Order $order)
+    {
+        $this->authorizeOrder($order);
+        
+        $order->load(['customer', 'seller.user', 'address', 'items']);
+        
+        $items = $order->items->map(function ($item) use ($order) {
+            return (object) [
+                'product_name' => $item->product_name ?? 'Product',
+                'variant_name' => null,
+                'status' => $item->status ?? $order->status,
+                'price' => $item->price,
+                'quantity' => $item->quantity,
+            ];
+        });
+
+        $pdf = Pdf::loadView('invoice', [
+            'order' => $order,
+            'items' => $items,
+            'isSellerInvoice' => true,
+        ]);
+
+        return $pdf->download("invoice-{$order->id}.pdf");
     }
 }

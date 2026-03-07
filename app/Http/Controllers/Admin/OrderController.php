@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Notifications\OrderStatusUpdatedNotification;
 use App\Notifications\OrderStatusChangedAdminNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -70,5 +72,40 @@ class OrderController extends Controller
             'message' => "Order #{$order->id} status updated to {$request->status}.",
             'data'    => $order,
         ]);
+    }
+
+    public function downloadInvoice(Order $order)
+    {
+        try {
+            Log::info("Admin downloading invoice for Order #{$order->id}");
+            $order->load(['customer', 'seller.user', 'address', 'items']);
+            
+            if (!$order->customer) {
+                Log::warning("Order #{$order->id} has no customer.");
+            }
+
+            $items = $order->items->map(function ($item) {
+                return (object) [
+                    'product_name' => $item->product_name ?? 'Product',
+                    'variant_name' => null,
+                    'price' => $item->price,
+                    'quantity' => $item->quantity,
+                ];
+            });
+
+            Log::info("Loading PDF view for Order #{$order->id}");
+            $pdf = Pdf::loadView('invoice', [
+                'order' => $order,
+                'items' => $items,
+                'isSellerInvoice' => false,
+            ]);
+
+            Log::info("Returning PDF stream for Order #{$order->id}");
+            return $pdf->download("invoice-{$order->id}.pdf");
+        } catch (\Exception $e) {
+            Log::error("Invoice download failed: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            return response()->json(['error' => 'Invoice generation failed: ' . $e->getMessage()], 500);
+        }
     }
 }

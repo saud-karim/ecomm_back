@@ -14,6 +14,10 @@ use App\Http\Controllers\Admin\PlanController as AdminPlanController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 
 // Seller
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
@@ -21,8 +25,11 @@ use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\OfferController as SellerOfferController;
 use App\Http\Controllers\Seller\CouponController as SellerCouponController;
 use App\Http\Controllers\Seller\AnalyticsController as SellerAnalyticsController;
+use App\Http\Controllers\Seller\ReviewController as SellerReviewController;
+use App\Http\Controllers\Seller\TicketController as SellerTicketController;
 use App\Http\Controllers\Seller\SubscriptionController as SellerSubscriptionController;
 use App\Http\Controllers\Seller\ProfileController as SellerProfileController;
+use App\Http\Controllers\Seller\SearchController as SellerSearchController;
 
 // Customer
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
@@ -62,6 +69,7 @@ Route::get('products',              [CustomerProductController::class, 'index'])
 Route::get('products/{slug}',       [CustomerProductController::class, 'show']);
 Route::get('categories',            [CustomerProductController::class, 'categories']);
 Route::get('flash-deals',           [CustomerProductController::class, 'flashDeals']);
+Route::get('banners',               [AdminBannerController::class, 'publicIndex']);
 
 // ══════════════════════════════════════════════════════
 // 👑 SUPER ADMIN ROUTES
@@ -75,11 +83,32 @@ Route::prefix('admin')
     Route::get('analytics',  [AdminAnalyticsController::class, 'analytics']);
     Route::get('reports',    [AdminAnalyticsController::class, 'reports']);
 
+    // Global Search
+    Route::get('search', [AdminSearchController::class, 'index']);
+
+    // Profile
+    Route::get('profile',          [AdminProfileController::class, 'show']);
+    Route::put('profile',          [AdminProfileController::class, 'update']);
+    Route::put('profile/password', [AdminProfileController::class, 'changePassword']);
+
+    // Banners
+    Route::get('banners',                    [AdminBannerController::class, 'index']);
+    Route::post('banners',                   [AdminBannerController::class, 'store']);
+    Route::post('banners/{banner}',          [AdminBannerController::class, 'update']); // POST for multipart
+    Route::put('banners/{banner}/toggle',    [AdminBannerController::class, 'toggle']);
+    Route::delete('banners/{banner}',        [AdminBannerController::class, 'destroy']);
+
     // Notifications
     Route::get('notifications',         [NotificationController::class, 'index']);
     Route::post('notifications/read-all',[NotificationController::class, 'markAllAsRead']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy']);
+
+    // Support Tickets
+    Route::get('tickets',                   [AdminTicketController::class, 'index']);
+    Route::get('tickets/{ticket}',          [AdminTicketController::class, 'show']);
+    Route::post('tickets/{ticket}/messages',[AdminTicketController::class, 'reply']);
+    Route::put('tickets/{ticket}/status',   [AdminTicketController::class, 'updateStatus']);
 
     // Users
     Route::get('users',               [AdminUserController::class, 'index']);
@@ -105,6 +134,7 @@ Route::prefix('admin')
     Route::get('orders',               [AdminOrderController::class, 'index']);
     Route::get('orders/{order}',       [AdminOrderController::class, 'show']);
     Route::put('orders/{order}/status',[AdminOrderController::class, 'updateStatus']);
+    Route::get('orders/{order}/invoice',[AdminOrderController::class, 'downloadInvoice']);
 
     // Plans
     Route::get('plans',          [AdminPlanController::class, 'index']);
@@ -153,6 +183,9 @@ Route::prefix('seller')
     Route::get('analytics/dashboard', [SellerAnalyticsController::class, 'dashboard']);
     Route::get('analytics/revenue',   [SellerAnalyticsController::class, 'revenue']);
 
+    // Global Search
+    Route::get('search', [SellerSearchController::class, 'index']);
+
     // Notifications
     Route::get('notifications',         [NotificationController::class, 'index']);
     Route::post('notifications/read-all',[NotificationController::class, 'markAllAsRead']);
@@ -172,6 +205,7 @@ Route::prefix('seller')
     Route::get('orders',                    [SellerOrderController::class, 'index']);
     Route::get('orders/{order}',            [SellerOrderController::class, 'show']);
     Route::put('orders/{order}/status',     [SellerOrderController::class, 'updateStatus']);
+    Route::get('orders/{order}/invoice',    [SellerOrderController::class, 'downloadInvoice']);
 
     // Offers
     Route::get('offers',          [SellerOfferController::class, 'index']);
@@ -184,6 +218,16 @@ Route::prefix('seller')
     Route::post('coupons',           [SellerCouponController::class, 'store']);
     Route::put('coupons/{coupon}',   [SellerCouponController::class, 'update']);
     Route::delete('coupons/{coupon}',[SellerCouponController::class, 'destroy']);
+
+    // Reviews
+    Route::get('reviews',              [SellerReviewController::class, 'index']);
+
+    // Support Tickets
+    Route::get('tickets',                   [SellerTicketController::class, 'index']);
+    Route::post('tickets',                  [SellerTicketController::class, 'store']);
+    Route::get('tickets/{ticket}',          [SellerTicketController::class, 'show']);
+    Route::post('tickets/{ticket}/messages',[SellerTicketController::class, 'reply']);
+
 });
 
 // ══════════════════════════════════════════════════════
