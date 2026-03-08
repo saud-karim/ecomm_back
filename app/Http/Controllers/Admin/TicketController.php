@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TicketController extends Controller
 {
@@ -13,7 +16,7 @@ class TicketController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status');
-        
+
         $tickets = Ticket::with('user:id,name,role')
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
@@ -28,9 +31,12 @@ class TicketController extends Controller
     /** GET /admin/tickets/{ticket} - View ticket and its messages */
     public function show(Ticket $ticket): JsonResponse
     {
-        $ticket->load(['user:id,name,email,role', 'messages.user' => function($q) {
-            $q->select('id', 'name', 'role');
-        }]);
+        $ticket->load([
+            'user:id,name,email,role',
+            'messages.user' => function ($q) {
+                $q->select('id', 'name', 'role');
+            }
+        ]);
 
         return response()->json(['success' => true, 'data' => $ticket]);
     }
@@ -46,9 +52,28 @@ class TicketController extends Controller
         ]);
 
         if ($ticket->status === 'open') {
-             $ticket->update(['status' => 'pending']); // Pending user response
+            $ticket->update(['status' => 'pending']); // Pending user response
         } else {
-             $ticket->touch(); // Update updated_at
+            $ticket->touch();
+        }
+
+        // Notify the seller (ticket owner) about the admin reply
+        $seller = User::find($ticket->user_id);
+        if ($seller) {
+            DB::table('notifications')->insert([
+                'id' => Str::uuid(),
+                'type' => 'TicketAdminReplied',
+                'notifiable_type' => User::class,
+                'notifiable_id' => $seller->id,
+                'data' => json_encode([
+                    'title' => 'Support Ticket Update',
+                    'message' => "Admin replied to your ticket: {$ticket->subject}",
+                    'ticket_id' => $ticket->id,
+                    'url' => "/seller/tickets/{$ticket->id}",
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         return response()->json(['success' => true, 'data' => $message->load('user:id,name,role')]);
@@ -58,7 +83,7 @@ class TicketController extends Controller
     public function updateStatus(Request $request, Ticket $ticket): JsonResponse
     {
         $request->validate(['status' => 'required|in:open,pending,closed']);
-        
+
         $ticket->update(['status' => $request->status]);
 
         return response()->json(['success' => true, 'message' => 'Ticket status updated']);

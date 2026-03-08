@@ -17,10 +17,10 @@ class AnalyticsController extends Controller
     /** GET /admin/dashboard */
     public function dashboard(): JsonResponse
     {
-        $totalRevenue  = Order::where('payment_status', 'paid')->sum('total');
-        $totalOrders   = Order::count();
-        $totalSellers  = Seller::where('is_approved', true)->count();
-        $totalCustomers = User::where('role', 'customer')->count();
+        $totalRevenue = Order::where('payment_status', 'paid')->sum('total');
+        $totalOrders = Order::count();
+        $totalSellers = Seller::where('is_approved', true)->count();
+        $totalUsers = User::count();
         $totalProducts = Product::where('status', 'approved')->count();
         $pendingProducts = Product::where('status', 'pending')->count();
         $pendingSellers = Seller::where('is_approved', false)->count();
@@ -75,22 +75,22 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
+            'data' => [
                 'kpis' => [
-                    'total_revenue'         => round($totalRevenue, 2),
-                    'total_orders'          => $totalOrders,
-                    'total_sellers'         => $totalSellers,
-                    'total_users'           => $totalCustomers,
-                    'total_products'        => $totalProducts,
-                    'pending_products'      => $pendingProducts,
-                    'pending_sellers'       => $pendingSellers,
-                    'active_subscriptions'  => $activeSubscriptions,
-                    'new_users_7d'          => $newUsers,
-                    'new_subs_7d'           => $newSubscriptions,
+                    'total_revenue' => round($totalRevenue, 2),
+                    'total_orders' => $totalOrders,
+                    'total_sellers' => $totalSellers,
+                    'total_users' => $totalUsers,
+                    'total_products' => $totalProducts,
+                    'pending_products' => $pendingProducts,
+                    'pending_sellers' => $pendingSellers,
+                    'active_subscriptions' => $activeSubscriptions,
+                    'new_users_7d' => $newUsers,
+                    'new_subs_7d' => $newSubscriptions,
                 ],
-                'revenue_chart'    => $revenueChart,
+                'revenue_chart' => $revenueChart,
                 'orders_by_status' => $ordersByStatus,
-                'top_sellers'      => $topSellers,
+                'top_sellers' => $topSellers,
             ],
         ]);
     }
@@ -99,7 +99,7 @@ class AnalyticsController extends Controller
     public function analytics(Request $request): JsonResponse
     {
         $from = $request->from_date ?? now()->subDays(30)->toDateString();
-        $to   = $request->to_date ?? now()->toDateString();
+        $to = $request->to_date ?? now()->toDateString();
 
         $dailyRevenue = Order::selectRaw('
                 DATE(created_at) as date,
@@ -135,11 +135,11 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'period'           => ['from' => $from, 'to' => $to],
-                'daily_revenue'    => $dailyRevenue,
-                'top_sellers'      => $topSellers,
-                'revenue_by_plan'  => $revenueByPlan,
+            'data' => [
+                'period' => ['from' => $from, 'to' => $to],
+                'daily_revenue' => $dailyRevenue,
+                'top_sellers' => $topSellers,
+                'revenue_by_plan' => $revenueByPlan,
             ],
         ]);
     }
@@ -148,7 +148,7 @@ class AnalyticsController extends Controller
     public function reports(Request $request): JsonResponse
     {
         $from = $request->from_date ?? now()->startOfMonth()->toDateString();
-        $to   = $request->to_date ?? now()->toDateString();
+        $to = $request->to_date ?? now()->toDateString();
 
         $salesSummary = Order::selectRaw('
                 COUNT(*) as total_orders,
@@ -176,12 +176,12 @@ class AnalyticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'period'                 => ['from' => $from, 'to' => $to],
-                'sales_summary'          => $salesSummary,
-                'orders_by_status'       => $ordersByStatus,
-                'new_signups'            => $newSignups,
-                'subscription_revenue'   => round($subscriptionRevenue, 2),
+            'data' => [
+                'period' => ['from' => $from, 'to' => $to],
+                'sales_summary' => $salesSummary,
+                'orders_by_status' => $ordersByStatus,
+                'new_signups' => $newSignups,
+                'subscription_revenue' => round($subscriptionRevenue, 2),
             ],
         ]);
     }

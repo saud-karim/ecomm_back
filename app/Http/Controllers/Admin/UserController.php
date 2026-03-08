@@ -17,7 +17,7 @@ class UserController extends Controller
             ->when($request->role, fn($q) => $q->where('role', $request->role))
             ->when($request->search, fn($q) => $q->where(function ($q) use ($request) {
                 $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%");
+                    ->orWhere('email', 'like', "%{$request->search}%");
             }))
             ->when($request->is_active !== null, fn($q) => $q->where('is_active', $request->boolean('is_active')))
             ->latest()
@@ -25,7 +25,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $users,
+            'data' => $users,
         ]);
     }
 
@@ -36,7 +36,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $user,
+            'data' => $user,
         ]);
     }
 
@@ -55,7 +55,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => $user->is_active ? 'User activated.' : 'User deactivated.',
-            'data'    => ['is_active' => $user->is_active],
+            'data' => ['is_active' => $user->is_active],
         ]);
     }
 
@@ -68,6 +68,22 @@ class UserController extends Controller
                 'message' => 'Cannot delete a super admin.',
             ], 403);
         }
+
+        // Delete related data in correct order to avoid FK constraint violations.
+        // 1. Delete order items linked to this customer's orders, then the orders.
+        $orderIds = \DB::table('orders')->where('customer_id', $user->id)->pluck('id');
+        if ($orderIds->isNotEmpty()) {
+            \DB::table('order_items')->whereIn('order_id', $orderIds)->delete();
+            \DB::table('orders')->whereIn('id', $orderIds)->delete();
+        }
+
+        // 2. Delete other related records
+        \DB::table('cart_items')->where('user_id', $user->id)->delete();
+        \DB::table('wishlist_items')->where('user_id', $user->id)->delete();
+        \DB::table('reviews')->where('customer_id', $user->id)->delete();
+        \DB::table('notifications')->where('notifiable_id', $user->id)
+            ->where('notifiable_type', User::class)->delete();
+        \DB::table('addresses')->where('user_id', $user->id)->delete();
 
         $user->delete();
 
