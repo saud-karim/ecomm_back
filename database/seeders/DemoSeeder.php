@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Seller;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Category;
@@ -121,6 +122,16 @@ class DemoSeeder extends Seeder
                     'views_count'          => rand(10, 500),
                     'created_at'           => now()->subDays(rand(1, 30)),
                 ]);
+
+                // Add a placeholder image so the app can display it
+                $picId = rand(1, 999);
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'url'        => "https://picsum.photos/id/{$picId}/400/400",
+                    'is_primary' => true,
+                    'sort_order' => 0,
+                ]);
+
                 $products[] = $product;
             }
             
