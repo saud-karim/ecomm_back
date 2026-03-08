@@ -69,7 +69,7 @@ class TicketController extends Controller
                     'title' => 'Support Ticket Update',
                     'message' => "Admin replied to your ticket: {$ticket->subject}",
                     'ticket_id' => $ticket->id,
-                    'url' => "/seller/tickets/{$ticket->id}",
+                    'url' => "/seller-dashboard/tickets",
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),
